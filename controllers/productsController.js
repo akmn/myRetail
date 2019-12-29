@@ -1,25 +1,8 @@
-const request = require('request');
-const async = require('async');
+const request = require('request-promise');
 
 function productsController(Product) {
-  function post(req, res) {
-    const product = new Product(req.body);
-    // TODO: Business validation on post
-    // if (!req.body.title) {
-    //   res.status(400);
-    //   return res.send('Title is required');
-    // }
-    product.save();
-    res.status(201);
-    return res.json(product);
-  }
-
   function get(req, res) {
     const query = {};
-    // TODO: Filtering
-    // if (req.query.genre) {
-    //   query.genre = req.query.genre;
-    // }
     Product.find(query, (err, products) => {
       if (err) {
         return res.send(err);
@@ -34,28 +17,64 @@ function productsController(Product) {
       });
 
       res.send(returnProducts);
+    });
+  }
+  function getItem(req, res) {
+    Product.findById(req.params.productId, (err, product) => {
+      if (err) {
+        return res.send(err);
+      }
+      if (product) {
+        const returnProduct = {};
+        returnProduct.id = product._id;
+        returnProduct.current_price = product.current_price;
 
-      // getProductNames(returnProducts, res);
+        returnProduct.links = {};
+        returnProduct.links.allproducts = `http://${req.headers.host}/api/products`;
+
+        const url = `http://redsky.target.com/v2/pdp/tcin/${returnProduct.id}?excludes=taxonomy,price,promotion,bulk_ship,rating_and_review_reviews,rating_and_review_statistics,question_answer_statistics`;
+
+        request(url).then((result) => {
+          returnProduct.name = JSON.parse(result).product.item.product_description.title;
+          return res.json(returnProduct);
+        });
+      } else {
+        return res.sendStatus(404);
+      }
+    });
+  }
+  function put(req, res) {
+    const product = {};
+    product.current_price = req.body.current_price;
+    Product.findById(req.params.productId, (err, product) => {
+      if (err) return res.status(500).send(err);
+      if (!req.body.current_price || !req.body.current_price.value || !req.body.current_price.currency_code) {
+        return res.status(400).send('Invalid entry received for current_price.  Please specify a value and currency_code.');
+      }
+      if (isNaN(req.body.current_price.value)) {
+        return res.status(400).send('Invalid entry received for current_price.  Please specify a numeric value.');
+      }
+      if (!(req.body.current_price.currency_code === 'USD')) {
+        return res.status(400).send('Invalid entry received for current_price.  The only allowable currency_code is USD.');
+      }
+      product.current_price = req.body.current_price;
+      /*TODO: 
+      unit tests
+      integration tests
+      Add readme 
+      */
+      product.save();
+
+      const returnProduct = {};
+      returnProduct.id = product._id;
+      returnProduct.current_price = product.current_price;
+      returnProduct.links = {};
+      returnProduct.links.allproducts = `http://${req.headers.host}/api/products`;
+      return res.json(returnProduct);
     });
   }
 
-  return { post, get };
-}
-
-function getProductNames(products, res) {
-  const promises = products.map(async product => {
-    const url = `http://redsky.target.com/v2/pdp/tcin/${product.id}?excludes=taxonomy,price,promotion,bulk_ship,rating_and_review_reviews,rating_and_review_statistics,question_answer_statistics`;
-    request(url).then((response) => {
-      const newProduct = JSON.parse(JSON.stringify(product));
-      newProduct.name = JSON.parse(response).product.item.product_description.title;
-      console.log(newProduct);
-      return Promise.resolve(newProduct);
-    });
-  });
-  console.log(promises);
-  Promise.all(promises).then((val) => {
-    console.log(val);
-  });
+  return { get, getItem, put };
 }
 
 module.exports = productsController;
