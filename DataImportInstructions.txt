@@ -1,0 +1,2 @@
+To seed a local Mongo DB with pricing info, make sure MongoD is running, then run the following command from the command line:
+mongoimport --uri 'mongodb://localhost/myRetailProducts' --collection products /file:'products.json'
