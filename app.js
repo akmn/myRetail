@@ -5,9 +5,9 @@ const bodyParser = require('body-parser');
 const app = express();
 
 if (process.env.ENV === 'Test') {
-  const db = mongoose.connect('mongodb://localhost/myRetailProducts-test');
+  mongoose.connect('mongodb://localhost/myRetailProducts-test');
 } else {
-  const db = mongoose.connect('mongodb://localhost/myRetailProducts');
+  mongoose.connect('mongodb://localhost/myRetailProducts');
 }
 
 const port = process.env.PORT || 3000;
@@ -23,6 +23,7 @@ app.get('/', (req, res) => {
 });
 
 app.server = app.listen(port, () => {
+  // eslint-disable-next-line no-console
   console.log(`Running on port ${port}`);
 });
 

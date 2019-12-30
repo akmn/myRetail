@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 const express = require('express');
 const productsController = require('../controllers/productsController');
-const request = require('request-promise');
 
 function routes(Product) {
   const productRouter = express.Router();
@@ -15,8 +14,5 @@ function routes(Product) {
     .put(controller.put);
   return productRouter;
 }
-
-
-
 
 module.exports = routes;

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "lint": "eslint .",
-    "test": "mocha tests/**/*Tests.js"
+    "test": "echo Tests are implemented via the associated Postman collection."
   },
   "author": "",
   "license": "ISC",
@@ -21,11 +21,7 @@
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.19.1",
-    "mocha": "^6.2.2",
-    "should": "^13.2.3",
-    "sinon": "^8.0.1",
-    "supertest": "^4.0.2"
+    "eslint-plugin-import": "^2.19.1"
   },
   "nodemonConfig": {
     "restartable": "rs",

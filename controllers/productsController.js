@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const request = require('request-promise');
 
 function productsController(Product) {
@@ -16,7 +17,7 @@ function productsController(Product) {
         return newProduct;
       });
 
-      res.send(returnProducts);
+      return res.send(returnProducts);
     });
   }
   function getItem(req, res) {
@@ -41,29 +42,32 @@ function productsController(Product) {
       } else {
         return res.sendStatus(404);
       }
+      return res.sendStatus(500);
     });
   }
   function put(req, res) {
     const product = {};
     product.current_price = req.body.current_price;
-    Product.findById(req.params.productId, (err, product) => {
+    Product.findById(req.params.productId, (err, putProduct) => {
       if (err) return res.status(500).send(err);
-      if (!req.body.current_price || !req.body.current_price.value || !req.body.current_price.currency_code) {
+      if (!putProduct) {
+        return res.sendStatus(404);
+      }
+      if (!req.body.current_price
+        || !req.body.current_price.value
+        || !req.body.current_price.currency_code) {
         return res.status(400).send('Invalid entry received for current_price.  Please specify a value and currency_code.');
       }
+      // eslint-disable-next-line no-restricted-globals
       if (isNaN(req.body.current_price.value)) {
         return res.status(400).send('Invalid entry received for current_price.  Please specify a numeric value.');
       }
       if (!(req.body.current_price.currency_code === 'USD')) {
         return res.status(400).send('Invalid entry received for current_price.  The only allowable currency_code is USD.');
       }
-      product.current_price = req.body.current_price;
-      /*TODO: 
-      unit tests
-      integration tests
-      Add readme 
-      */
-      product.save();
+      // eslint-disable-next-line no-param-reassign
+      putProduct.current_price = req.body.current_price;
+      putProduct.save();
 
       const returnProduct = {};
       returnProduct.id = product._id;
