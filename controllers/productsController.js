@@ -42,7 +42,7 @@ function productsController(Product) {
       } else {
         return res.sendStatus(404);
       }
-      return res.sendStatus(500);
+      return res;
     });
   }
   function put(req, res) {
